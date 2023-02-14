@@ -6,16 +6,31 @@ require 'active_support/inflector'
 class SQLObject
   def self.columns
     # ...
+    if @columns == nil
+      @columns =
+      DBConnection.execute2(<<-SQL)
+        SELECT
+          *
+        FROM
+          #{table_name}
+      SQL
+      @columns = @columns[0]
+      @columns.map!{|col| col.to_sym}
+    end
+    @columns
+
   end
 
   def self.finalize!
   end
 
   def self.table_name=(table_name)
-    # ...
+    @table_name = table_name
   end
 
   def self.table_name
+    @table_name ||= self.to_s.tableize
+    return @table_name
     # ...
   end
 
